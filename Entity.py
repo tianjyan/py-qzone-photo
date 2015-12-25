@@ -1,5 +1,5 @@
+# -*- coding:utf-8 -*-
 __author__ = 'young'
-#coding=utf-8
 
 album1 = "http://alist.photo.qq.com/"
 album2 = "http://xalist.photo.qq.com/"
@@ -12,8 +12,8 @@ photo2 = "http://xaplist.photo.qq.com/"
 photobase1 = "http://plist.photo.qq.com/fcgi-bin/fcg_list_photo?uin="
 photobase2 = "http://xaplist.photo.qq.com/fcgi-bin/fcg_list_photo?uin="
 
-savepath = "/Users/young/downloads/qqPhoto" #图片保存位置的父目录
-
+#savepath = "/Users/young/downloads/qqPhoto" #图片保存位置的父目录
+savepath = 'C:\Users\young\Documents\Visual Studio 2015\Projects\Qzone_Photo'
 
 class Album:
     def __init__(self, uid, name, count):

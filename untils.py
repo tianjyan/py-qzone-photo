@@ -1,5 +1,6 @@
+# -*- coding:utf-8 -*-
 __author__ = 'young'
-#coding=utf-8
+
 import json
 import urllib2
 import os
@@ -45,23 +46,23 @@ def saveImage(path, photo, qq, index):
     f = urllib2.urlopen(url, timeout=10)
     data = f.read()
     f.close()
-    if not os.path.exists(path+'/'+qq):
-        os.mkdir(path+'/'+qq)
-    with open(path+'/'+qq+'/' + index + '.jpeg', "wb") as code:
+    if not os.path.exists(path+os.path.sep+qq):
+        os.mkdir(path+os.path.sep+qq)
+    with open(path+os.path.sep+qq+os.path.sep + index + '.jpeg', "wb") as code:
         code.write(data)
         code.close()
 
 
 def savePhotos(qq, path=Entity.savepath):
-    print '获取：'+qq+'的相册信息'
+    print u'获取：'+qq+u'的相册信息'
     ablums = getAblums(qq, Entity.albumbase2)
     if len(ablums) > 0:
         for i, a in enumerate(ablums):
             if a.Count > 0:
-                print '开始下载第'+str(i+1)+'个相册'
+                print u'开始下载第'+str(i+1)+u'个相册'
                 photos = getPhotosByAlum(a, qq, Entity.photobase2)
                 for index, p in enumerate(photos):
                     saveImage(path, p, qq, str(i)+'_'+str(index))
-                print '第'+str(i+1)+'个相册下载完成'
+                print u'第'+str(i+1)+u'个相册下载完成'
     else:
-        print '读取到得相册个数为0'
+        print u'读取到得相册个数为0'
