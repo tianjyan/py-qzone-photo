@@ -13,7 +13,7 @@ photobase1 = "http://plist.photo.qq.com/fcgi-bin/fcg_list_photo?uin="
 photobase2 = "http://xaplist.photo.qq.com/fcgi-bin/fcg_list_photo?uin="
 
 #savepath = "/Users/young/downloads/qqPhoto" #图片保存位置的父目录
-savepath = 'C:\Users\young\Documents\Visual Studio 2015\Projects\Qzone_Photo'
+savepath = 'C:\Users\young\Desktop'
 
 class Album:
     def __init__(self, uid, name, count):

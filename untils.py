@@ -55,12 +55,12 @@ def saveImage(path, photo, qq, index):
 
 def savePhotos(qq, path=Entity.savepath):
     print u'获取：'+qq+u'的相册信息'
-    ablums = getAblums(qq, Entity.albumbase2)
+    ablums = getAblums(qq, Entity.albumbase1)
     if len(ablums) > 0:
         for i, a in enumerate(ablums):
             if a.Count > 0:
                 print u'开始下载第'+str(i+1)+u'个相册'
-                photos = getPhotosByAlum(a, qq, Entity.photobase2)
+                photos = getPhotosByAlum(a, qq, Entity.photobase1)
                 for index, p in enumerate(photos):
                     saveImage(path, p, qq, str(i)+'_'+str(index))
                 print u'第'+str(i+1)+u'个相册下载完成'
