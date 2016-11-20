@@ -24,12 +24,11 @@ def getAblums(qq, url):
     return ablums
 
 
-def getPhotosByAlum(album, qq, url):
+def getPhotosByAlum(album, qq, url, cookie):
     photos = list()
     print url + qq + "&albumid=" + album.ID + "&outstyle=json"
     request = urllib2.Request(url + qq + "&albumid=" + album.ID + "&outstyle=json")
-    request.add_header('Cookie', 'ptisp=cm; RK=Rd2K6FKnPf; ptcz=3729599bb480f540040ea62f9fcce2bae34f4d401be0ed6f160640f7324f29ce; pt2gguin=o0602747874; uin=o0602747874; skey=@WBrfsalir')
-    print request.headers
+    request.add_header('Cookie', cookie) 
     f = urllib2.urlopen(request, timeout=10)
     response = f.read().decode('gbk')
     f.close()
@@ -56,14 +55,14 @@ def saveImage(path, photo, qq, index):
         code.close()
 
 
-def savePhotos(qq, path=Entity.savepath):
+def savePhotos(qq, cookie, path=Entity.savepath):
     print u'获取：'+qq+u'的相册信息'
     ablums = getAblums(qq, Entity.albumbase1)
     if len(ablums) > 0:
         for i, a in enumerate(ablums):
             if a.Count > 0:
                 print u'开始下载第'+str(i+1)+u'个相册'
-                photos = getPhotosByAlum(a, qq, Entity.photobase1)
+                photos = getPhotosByAlum(a, qq, Entity.photobase1, cookie)
                 for index, p in enumerate(photos):
                     saveImage(path, p, qq, str(i)+'_'+str(index))
                 print u'第'+str(i+1)+u'个相册下载完成'

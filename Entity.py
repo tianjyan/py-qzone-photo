@@ -15,6 +15,9 @@ photobase2 = "http://xaplist.photo.qq.com/fcgi-bin/fcg_list_photo?uin="
 savepath = "/Users/young/downloads/qqPhoto" #图片保存位置的父目录
 #savepath = 'C:\Users\young\Desktop'
 
+loginQQ = 12345678
+loginPassword = 'password'
+
 class Album:
     def __init__(self, uid, name, count):
         self.ID = uid
