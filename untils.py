@@ -28,9 +28,12 @@ def getPhotosByAlum(album, qq, url):
     photos = list()
     print url + qq + "&albumid=" + album.ID + "&outstyle=json"
     request = urllib2.Request(url + qq + "&albumid=" + album.ID + "&outstyle=json")
+    request.add_header('Cookie', 'ptisp=cm; RK=Rd2K6FKnPf; ptcz=3729599bb480f540040ea62f9fcce2bae34f4d401be0ed6f160640f7324f29ce; pt2gguin=o0602747874; uin=o0602747874; skey=@WBrfsalir')
+    print request.headers
     f = urllib2.urlopen(request, timeout=10)
     response = f.read().decode('gbk')
     f.close()
+    print response
     response = response.replace('_Callback(', '')
     response = response.replace(');', '')
     #print response
