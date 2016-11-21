@@ -91,3 +91,6 @@ ENV/
 
 # Visual Studio Code settings
 .vscode
+
+# Download Folder
+qzonephoto

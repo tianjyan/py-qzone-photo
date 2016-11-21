@@ -1,20 +1,17 @@
-# -*- coding:utf-8 -*-
-__author__ = 'young'
+#!/usr/bin/env python
+# coding=utf-8
+# pylint: disable=C0103
+# pylint: disable=C0111
+# pylint: disable=C1001
+# pylint: disable=R0903
 
-import untils
-import Entity
-from qqlib import qzone
+import qphoto
 
-qq = 12345678
+qq = 10000
+print '正在登陆...'
+qz = qphoto.QzonePhoto()
+qz.login(12345678, 'password')
+print '登录完成!'
 while True:
-    qzone = qzone.QZone(Entity.loginQQ, Entity.loginPassword)
-    qzone.login()
-    cookie = qzone.session.cookies
-    cookieStr = 'ptisp={0}; RK={1}; ptcz={2}; pt2gguin={3}; uin={4}; skey={5}'.format(cookie['ptisp'],cookie['RK'],cookie['ptcz'],cookie['pt2gguin'],cookie['uin'],cookie['skey'])
-    print cookieStr
-    untils.savePhotos(str(qq), cookieStr)
-    break
-    ##qq += 1
-
-
-
+    qz.savePhotos(qq)
+    qq += 1
