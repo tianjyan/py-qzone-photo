@@ -53,6 +53,7 @@ class QzonePhoto:
         requestUrl = self.albumbase1 + str(qqNumber) + "&outstyle=2"
         print requestUrl
         request = urllib2.Request(requestUrl)
+        request.add_header('Cookie', self.cookie)
         response = urllib2.urlopen(request, timeout=10)
         content = response.read().decode('gbk')
         response.close()
