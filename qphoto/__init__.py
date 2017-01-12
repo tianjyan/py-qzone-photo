@@ -72,15 +72,20 @@ class QzonePhoto(object):
             content = response.read().decode('gbk')
         except Exception:
             print u'获取相册集失败:qq-%s' % number
-            # traceback.print_exc()
+            traceback.print_exc()
             return ablums
         finally:
             response.close()
         content = content.replace('_Callback(', '')
         content = content.replace(');', '')
-        if 'album' in json.loads(content):
-            for i in json.loads(content)['album']:
-                ablums.append(Album(i['id'], i['name'], i['total']))
+        try:
+            if 'album' in json.loads(content):
+                for i in json.loads(content)['album']:
+                    ablums.append(Album(i['id'], i['name'], i['total']))
+        except Exception:
+            print u'转换相册集Json失败:qq-%s' % number
+            print content
+            traceback.print_exc()
         return ablums
 
     def getphotosbyalbum(self, album, number):
@@ -98,15 +103,20 @@ class QzonePhoto(object):
             content = response.read().decode('gbk')
         except Exception:
             print u'获取相册失败:qq-%s' % number
-            # traceback.print_exc()
+            traceback.print_exc()
             return photos
         finally:
             response.close()
         content = content.replace('_Callback(', '')
         content = content.replace(');', '')
-        if 'pic' in json.loads(content):
-            for i in json.loads(content)['pic']:
-                photos.append(Photo(i['url'], i['name'], album))
+        try:
+            if 'pic' in json.loads(content):
+                for i in json.loads(content)['pic']:
+                    photos.append(Photo(i['url'], i['name'], album))
+        except Exception:
+            print u'转换相册Json失败:qq-%s' % number
+            print content
+            traceback.print_exc()
         return photos
 
     @classmethod
