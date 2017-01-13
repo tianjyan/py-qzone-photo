@@ -1,124 +1,160 @@
 #!/usr/bin/env python
 # coding=utf-8
-# pylint: disable=C0103
-# pylint: disable=C0111
-# pylint: disable=C1001
-# pylint: disable=R0903
+# pylint: disable=W0703
+
 '''
-Qzone Photo Download module
+QQ空间相册查询下载模块
+Licensed to MIT
 '''
 
 import json
+import traceback
 import urllib2
 import os
 from qqlib import qzone
 import qqlib
+from qphoto.model import Album, Photo
+import common
 
-class QzonePhoto:
 
-    albumbase1 = "http://alist.photo.qq.com/fcgi-bin/fcg_list_album?uin="#如果没有设置密保的相册是通过这个地址访问的
-    albumbase2 = "http://xalist.photo.qq.com/fcgi-bin/fcg_list_album?uin="#//设置密保的相册是通过这个地址访问的
+class QzonePhoto(object):
+    """
+    查询QQ空间相册并下载的类。
+    """
+    albumbase1 = "http://alist.photo.qq.com/fcgi-bin/fcg_list_album?uin=" # 如果没有设置密保的相册是通过这个地址访问的
+    albumbase2 = "http://xalist.photo.qq.com/fcgi-bin/fcg_list_album?uin=" # 设置密保的相册是通过这个地址访问的
     photobase1 = "http://plist.photo.qq.com/fcgi-bin/fcg_list_photo?uin="
     photobase2 = "http://xaplist.photo.qq.com/fcgi-bin/fcg_list_photo?uin="
 
     def __init__(self):
         self.cookie = None
 
-    def login(self, qqNumber, password):
-        qq = qzone.QQ(qqNumber, password)
+    def login(self, number, password):
+        """登录QQ。
+        如果需要验证码，会保存验证码到本地，需要手动识别输入
+        """
+        request = qzone.QQ(number, password)
         try:
-            qq.login()
-        except qqlib.NeedVerifyCode as e:
+            request.login()
+        except qqlib.NeedVerifyCode as exception:
             # 需要验证码
-            verifier = e.verifier
+            verifier = exception.verifier
             open('verify.jpg', 'wb').write(verifier.image)
-            print '验证码已保存到verify.jpg'
-            vcode = input('请输入验证码：')
+            print u'验证码已保存到verify.jpg'
+            vcode = input(u'请输入验证码')
             try:
                 verifier.verify(vcode)
-            except qqlib.VerifyCodeError as e:
+            except qqlib.VerifyCodeError:
                 print '验证码错误！'
-                raise e
+                raise exception
             else:
-                qq.login()
-        cookie = qq.session.cookies
-        cookieStr = 'ptisp={0}; RK={1}; ptcz={2};\
+                request.login()
+        cookie = request.session.cookies
+        cookies = 'ptisp={0}; RK={1}; ptcz={2};\
                     pt2gguin={3}; uin={4}; skey={5}'.\
                     format(cookie['ptisp'], cookie['RK'], cookie['ptcz'],\
                     cookie['pt2gguin'], cookie['uin'], cookie['skey'])
-        self.cookie = cookieStr
+        self.cookie = cookies
 
-    def getAblums(self, qqNumber):
+    def getablums(self, number):
+        """获取相册集。
+        可能会遇到未登录的错误，或者解码失败的错误。
+        查询失败会返回一个空的集合。
+        """
         ablums = list()
-        requestUrl = self.albumbase1 + str(qqNumber) + "&outstyle=2"
-        print requestUrl
-        request = urllib2.Request(requestUrl)
+        requesturl = self.albumbase1 + str(number) + "&outstyle=2"
+        # print u'相册集地址:' + requesturl
+        request = urllib2.Request(requesturl)
         request.add_header('Cookie', self.cookie)
-        response = urllib2.urlopen(request, timeout=10)
-        content = response.read().decode('gbk')
-        response.close()
+        content = None
+        response = None
+        try:
+            response = urllib2.urlopen(request, timeout=10)
+            content = response.read().decode('gbk')
+        except Exception:
+            print u'获取相册集失败:qq-%s' % number
+            traceback.print_exc()
+            return ablums
+        finally:
+            if response != None:
+                response.close()
         content = content.replace('_Callback(', '')
         content = content.replace(');', '')
-        if 'album' in json.loads(content):
-            for i in json.loads(content)['album']:
-                ablums.append(Album(i['id'], i['name'], i['total']))
+        try:
+            if 'album' in json.loads(content):
+                for i in json.loads(content)['album']:
+                    ablums.append(Album(i['id'], i['name'], i['total']))
+        except Exception:
+            print u'转换相册集Json失败:qq-%s' % number
+            print content
+            traceback.print_exc()
         return ablums
 
-    def getPhotosByAlum(self, album, qqNumber):
+    def getphotosbyalbum(self, album, number):
+        """获取相册。
+        可能会遇到未登录的错误，或者解码失败的错误。
+        """
         photos = list()
-        requestUrl = self.photobase1 + str(qqNumber) + "&albumid=" + album.ID + "&outstyle=json"
-        print requestUrl
-        request = urllib2.Request(requestUrl)
+        requesturl = self.photobase1 + str(number) + "&albumid=" + album.uid + "&outstyle=json"
+        # print u'相册地址:' +  requesturl
+        request = urllib2.Request(requesturl)
         request.add_header('Cookie', self.cookie)
-        response = urllib2.urlopen(request, timeout=10)
-        content = response.read().decode('gbk')
-        response.close()
+        content = None
+        response = None
+        try:
+            response = urllib2.urlopen(request, timeout=10)
+            content = response.read().decode('gbk')
+        except Exception:
+            print u'获取相册失败:qq-%s' % number
+            traceback.print_exc()
+            return photos
+        finally:
+            if response != None:
+                response.close()
         content = content.replace('_Callback(', '')
         content = content.replace(');', '')
-        if 'pic' in json.loads(content):
-            for i in json.loads(content)['pic']:
-                photos.append(Photo(i['url'], i['name'], album))
+        try:
+            if 'pic' in json.loads(content):
+                for i in json.loads(content)['pic']:
+                    photos.append(Photo(i['url'], i['name'], album))
+        except Exception:
+            print u'转换相册Json失败:qq-%s' % number
+            print content
+            traceback.print_exc()
         return photos
 
-    def saveImage(self, photo, qqNumber, index):
-        print index, photo.URL
-        url = photo.URL.replace('\\', '')
+    @classmethod
+    def savephoto(cls, args):
+        """保存图片。
+        保存到工作目录下的qzonephoto文件夹下。
+        格式：QQ号_相册编号_图片编号.jpeg
+        """
+        photo, index = args
+        print u'下载文件:' + index
+        # print u'文件地址:' + photo.url
+        url = photo.url.replace('\\', '')
         response = urllib2.urlopen(url, timeout=10)
         data = response.read()
         response.close()
-        downloadFolder = os.getcwd()+os.path.sep+'qzonephoto'
-        if not os.path.exists(downloadFolder):
-            os.mkdir(downloadFolder)
-        targetFolder = downloadFolder+os.path.sep+str(qqNumber)
-        if not os.path.exists(targetFolder):
-            os.mkdir(targetFolder)
-        with open(targetFolder + os.path.sep + index + '.jpeg', "wb") as code:
+        downloadfolder = os.getcwd()+os.path.sep+'qzonephoto'
+        if not os.path.exists(downloadfolder):
+            os.mkdir(downloadfolder)
+        with open(downloadfolder + os.path.sep + index + '.jpeg', "wb") as code:
             code.write(data)
             code.close()
 
-    def savePhotos(self, qqNumber):
-        print u'获取：'+str(qqNumber)+u'的相册信息'
-        ablums = self.getAblums(qqNumber)
+    def savephotos(self, number):
+        """保存相册。
+        查询相册并保存图片
+        """
+        print u'获取：'+str(number)+u'的相册信息'
+        ablums = self.getablums(number)
         if len(ablums) > 0:
-            for i, a in enumerate(ablums):
-                if a.Count > 0:
-                    print u'开始下载第'+str(i+1)+u'个相册'
-                    photos = self.getPhotosByAlum(a, qqNumber)
-                    for index, p in enumerate(photos):
-                        self.saveImage(p, qqNumber, str(i)+'_'+str(index))
-                    print u'第'+str(i+1)+u'个相册下载完成'
+            for i, ablum in enumerate(ablums):
+                if ablum.count > 0:
+                    photos = self.getphotosbyalbum(ablum, number)
+                    for index, photo in enumerate(photos):
+                        common.get_queue().put((self.savephoto, \
+                        [(photo, str(number) + '_' + str(i) + '_'+str(index))]), block=True)
         else:
             print u'读取到得相册个数为0'
-
-class Album:
-    def __init__(self, uid, name, count):
-        self.ID = uid
-        self.Name = name
-        self.Count = count
-
-
-class Photo:
-    def __init__(self, url, name, album):
-        self.URL = url
-        self.Name = name
-        self.Album = album

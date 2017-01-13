@@ -94,3 +94,6 @@ ENV/
 
 # Download Folder
 qzonephoto
+
+# test class
+app.py
