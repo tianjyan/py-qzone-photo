@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 # coding=utf-8
-# pylint: disable=R0903
 # pylint: disable=W0703
 
 '''
@@ -14,6 +13,7 @@ import urllib2
 import os
 from qqlib import qzone
 import qqlib
+from qphoto.model import Album, Photo
 import common
 
 
@@ -64,9 +64,10 @@ class QzonePhoto(object):
         ablums = list()
         requesturl = self.albumbase1 + str(number) + "&outstyle=2"
         # print u'相册集地址:' + requesturl
-        content = None
         request = urllib2.Request(requesturl)
         request.add_header('Cookie', self.cookie)
+        content = None
+        response = None
         try:
             response = urllib2.urlopen(request, timeout=10)
             content = response.read().decode('gbk')
@@ -75,7 +76,8 @@ class QzonePhoto(object):
             traceback.print_exc()
             return ablums
         finally:
-            response.close()
+            if response != None:
+                response.close()
         content = content.replace('_Callback(', '')
         content = content.replace(');', '')
         try:
@@ -98,6 +100,7 @@ class QzonePhoto(object):
         request = urllib2.Request(requesturl)
         request.add_header('Cookie', self.cookie)
         content = None
+        response = None
         try:
             response = urllib2.urlopen(request, timeout=10)
             content = response.read().decode('gbk')
@@ -106,7 +109,8 @@ class QzonePhoto(object):
             traceback.print_exc()
             return photos
         finally:
-            response.close()
+            if response != None:
+                response.close()
         content = content.replace('_Callback(', '')
         content = content.replace(');', '')
         try:
@@ -154,21 +158,3 @@ class QzonePhoto(object):
                         [(photo, str(number) + '_' + str(i) + '_'+str(index))]), block=True)
         else:
             print u'读取到得相册个数为0'
-
-class Album(object):
-    """
-    相册类
-    """
-    def __init__(self, uid, name, count):
-        self.uid = uid
-        self.name = name
-        self.count = count
-
-class Photo(object):
-    """
-    照片类
-    """
-    def __init__(self, url, name, album):
-        self.url = url
-        self.name = name
-        self.album = album
