@@ -21,8 +21,8 @@ class QzonePhoto(object):
     """
     查询QQ空间相册并下载的类。
     """
-    albumbase1 = "http://alist.photo.qq.com/fcgi-bin/fcg_list_album?uin=" # 如果没有设置密保的相册是通过这个地址访问的
-    albumbase2 = "http://xalist.photo.qq.com/fcgi-bin/fcg_list_album?uin=" # 设置密保的相册是通过这个地址访问的
+    albumbase1 = "http://alist.photo.qq.com/fcgi-bin/fcg_list_album?uin="  # 如果没有设置密保的相册是通过这个地址访问的
+    albumbase2 = "http://xalist.photo.qq.com/fcgi-bin/fcg_list_album?uin="  # 设置密保的相册是通过这个地址访问的
     photobase1 = "http://plist.photo.qq.com/fcgi-bin/fcg_list_photo?uin="
     photobase2 = "http://xaplist.photo.qq.com/fcgi-bin/fcg_list_photo?uin="
 
@@ -50,10 +50,8 @@ class QzonePhoto(object):
             else:
                 request.login()
         cookie = request.session.cookies
-        cookies = 'ptisp={0}; RK={1}; ptcz={2};\
-                    pt2gguin={3}; uin={4}; skey={5}'.\
-                    format(cookie['ptisp'], cookie['RK'], cookie['ptcz'],\
-                    cookie['pt2gguin'], cookie['uin'], cookie['skey'])
+        cookies = 'ptisp={0}; RK={1}; ptcz={2};pt2gguin={3}; uin={4}; skey={5}'.format(
+            cookie['ptisp'], cookie['RK'], cookie['ptcz'], cookie['pt2gguin'], cookie['uin'], cookie['skey'])
         self.cookie = cookies
 
     def getablums(self, number):
@@ -76,7 +74,7 @@ class QzonePhoto(object):
             traceback.print_exc()
             return ablums
         finally:
-            if response != None:
+            if response is not None:
                 response.close()
         content = content.replace('_Callback(', '')
         content = content.replace(');', '')
@@ -109,7 +107,7 @@ class QzonePhoto(object):
             traceback.print_exc()
             return photos
         finally:
-            if response != None:
+            if response is not None:
                 response.close()
         content = content.replace('_Callback(', '')
         content = content.replace(');', '')
@@ -136,7 +134,7 @@ class QzonePhoto(object):
         response = urllib2.urlopen(url, timeout=10)
         data = response.read()
         response.close()
-        downloadfolder = os.getcwd()+os.path.sep+'qzonephoto'
+        downloadfolder = os.getcwd() + os.path.sep + 'qzonephoto'
         if not os.path.exists(downloadfolder):
             os.mkdir(downloadfolder)
         with open(downloadfolder + os.path.sep + index + '.jpeg', "wb") as code:
@@ -147,14 +145,14 @@ class QzonePhoto(object):
         """保存相册。
         查询相册并保存图片
         """
-        print u'获取：'+str(number)+u'的相册信息'
+        print u'获取：' + str(number) + u'的相册信息'
         ablums = self.getablums(number)
         if len(ablums) > 0:
             for i, ablum in enumerate(ablums):
                 if ablum.count > 0:
                     photos = self.getphotosbyalbum(ablum, number)
                     for index, photo in enumerate(photos):
-                        common.get_queue().put((self.savephoto, \
-                        [(photo, str(number) + '_' + str(i) + '_'+str(index))]), block=True)
+                        common.get_queue().put(
+                            (self.savephoto, [(photo, str(number) + '_' + str(i) + '_' + str(index))]), block=True)
         else:
             print u'读取到得相册个数为0'

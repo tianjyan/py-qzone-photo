@@ -6,6 +6,7 @@
 Licensed to MIT
 '''
 
+
 class Album(object):
     """
     相册类
@@ -14,6 +15,7 @@ class Album(object):
         self.uid = uid
         self.name = name
         self.count = count
+
 
 class Photo(object):
     """
