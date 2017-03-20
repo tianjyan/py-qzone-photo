@@ -1,6 +1,6 @@
 # 简介
-![Language](https://img.shields.io/badge/Language-Python%202.7-blue.svg)
-![Build](https://api.travis-ci.org/youngytj/Qzone_Photo.svg?branch=master)
+[![Platform](https://img.shields.io/badge/Language-Python%202.7-blue.svg)](https://www.python.org/)
+[![Build](https://api.travis-ci.org/youngytj/Qzone_Photo.svg?branch=master)](https://travis-ci.org/youngytj/Qzone_Photo)
 
 批量下载公开相册的照片。
 
