@@ -21,9 +21,10 @@ class QzonePhoto(object):
     """
     查询QQ空间相册并下载的类。
     """
-    albumbase1 = "http://alist.photo.qq.com/fcgi-bin/fcg_list_album?uin="  # 如果没有设置密保的相册是通过这个地址访问的
+
+    albumbase1 = "http://photo.qq.com/fcgi-bin/fcg_list_album?uin="  # 如果没有设置密保的相册是通过这个地址访问的
     albumbase2 = "http://xalist.photo.qq.com/fcgi-bin/fcg_list_album?uin="  # 设置密保的相册是通过这个地址访问的
-    photobase1 = "http://plist.photo.qq.com/fcgi-bin/fcg_list_photo?uin="
+    photobase1 = "http://photo.qq.com/fcgi-bin/fcg_list_photo?uin="
     photobase2 = "http://xaplist.photo.qq.com/fcgi-bin/fcg_list_photo?uin="
 
     def __init__(self):
