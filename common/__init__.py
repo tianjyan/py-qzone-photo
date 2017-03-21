@@ -7,12 +7,14 @@
 Licensed to MIT
 '''
 
+
 def set_queue(value):
     """
     设置工作队列。
     """
     global WORKQUEUE
     WORKQUEUE = value
+
 
 def get_queue():
     """

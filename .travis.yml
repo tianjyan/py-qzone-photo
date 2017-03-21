@@ -1,0 +1,15 @@
+language: "python"
+
+python:
+   - "2.7"
+
+install:
+   - pip install flake8
+
+script:
+   - flake8 --ignore=W191,F401,E501,F403 .
+
+notifications:
+  email:
+    on_success: change
+    on_failure: always

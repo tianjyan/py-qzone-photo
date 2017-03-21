@@ -13,6 +13,7 @@ import Queue
 import threading
 import common
 
+
 class Worker(threading.Thread):
     """
     任务重试和执行的类。
