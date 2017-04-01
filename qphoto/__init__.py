@@ -36,19 +36,16 @@ class QzonePhoto(object):
         request = qzone.QQ(number, password)
         try:
             request.login()
-        except qqlib.NeedVerifyCode as exception:
-            # 需要验证码
-            verifier = exception.verifier
-            open('verify.jpg', 'wb').write(verifier.image)
+        except qqlib.NeedVerifyCode as exc:
+            if exc.message:
+                print('Error:', exc.message)
+            verifier = exc.verifier
+            open('verify.jpg', 'wb').write(verifier.fetch_image())
             print u'验证码已保存到verify.jpg'
-            vcode = input(u'请输入验证码')
-            try:
-                verifier.verify(vcode)
-            except qqlib.VerifyCodeError:
-                print '验证码错误！'
-                raise exception
-            else:
-                request.login()
+            # 输入验证码
+            vcode = input(u'请输入验证码：')
+            verifier.verify(vcode)
+            request.login()
         cookie = request.session.cookies
         cookies = 'ptisp={0}; RK={1}; ptcz={2};pt2gguin={3}; uin={4}; skey={5}'.format(
             cookie['ptisp'], cookie['RK'], cookie['ptcz'], cookie['pt2gguin'], cookie['uin'], cookie['skey'])
