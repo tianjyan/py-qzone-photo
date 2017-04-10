@@ -135,7 +135,7 @@ class QzonePhoto(object):
         downloadfolder = os.path.join('qzonephoto', photo.album.name)
         if not os.path.exists(downloadfolder):
             os.mkdir(downloadfolder)
-        with open(os.path.join(downloadfolder , photo.name + '.jpeg'), "wb") as code:
+        with open(os.path.join(downloadfolder, photo.name + '.jpeg'), "wb") as code:
             code.write(data)
             code.close()
 
