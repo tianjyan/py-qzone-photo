@@ -132,10 +132,10 @@ class QzonePhoto(object):
         response = urllib2.urlopen(url, timeout=10)
         data = response.read()
         response.close()
-        downloadfolder = os.getcwd() + os.path.sep + 'qzonephoto'
+        downloadfolder = os.path.join('qzonephoto', photo.album.name)
         if not os.path.exists(downloadfolder):
             os.mkdir(downloadfolder)
-        with open(downloadfolder + os.path.sep + index + '.jpeg', "wb") as code:
+        with open(os.path.join(downloadfolder , photo.name + '.jpeg'), "wb") as code:
             code.write(data)
             code.close()
 
@@ -151,6 +151,6 @@ class QzonePhoto(object):
                     photos = self.getphotosbyalbum(ablum, number)
                     for index, photo in enumerate(photos):
                         common.get_queue().put(
-                            (self.savephoto, [(photo, str(number) + '_' + str(i) + '_' + str(index))]), block=True)
+                            (self.savephoto, [(photo, str(index))]), block=True)
         else:
             print u'读取到得相册个数为0'
