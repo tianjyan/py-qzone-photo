@@ -73,9 +73,8 @@ class QzonePhoto(object):
         try:
             response = self.session.get(requesturl, timeout=8)
             content = response.text
-            print content
         except Exception:
-            print u'获取相册集失败:qq-%s' % number
+            print u'获取{0}的相册集失败。'.format(number)
             traceback.print_exc()
             return ablums
         finally:
@@ -89,9 +88,9 @@ class QzonePhoto(object):
                 if 'data' in content and 'albumListModeClass' in content['data']:
                     for item in content['data']['albumListModeClass']:
                         for album in item['albumList']:
-                            ablums.append(Album._make(album['id'], album['name'], album['total']))
+                            ablums.append(Album._make([album['id'], album['name'], album['total']]))
         except Exception:
-            print u'转换相册集Json失败:qq-%s' % number
+            print u'转换{0}的相册集Json失败'.format(number)
             print content
             traceback.print_exc()
         return ablums
@@ -110,9 +109,8 @@ class QzonePhoto(object):
         try:
             response = self.session.get(requesturl, timeout=8)
             content = response.text
-            print content
         except Exception:
-            print u'获取相册失败:qq-%s' % number
+            print u'获取{0}的相册失败。'.format(number)
             traceback.print_exc()
             return photos
         finally:
@@ -120,7 +118,6 @@ class QzonePhoto(object):
                 response.close()
         content = content.replace('_Callback(', '')
         content = content.replace(');', '')
-        print content
         try:
             if content:
                 content = content.replace('_Callback(', '')
@@ -129,9 +126,9 @@ class QzonePhoto(object):
                 if 'data' in content and 'photoList' in content['data']:
                     for item in content['data']['photoList']:
                         url = ('origin_url' in item and item['origin_url'] or item['url'])
-                        photos.append(Photo._make(url, item['name'], album))
+                        photos.append(Photo._make([url, item['name'], album]))
         except Exception:
-            print u'转换相册Json失败:qq-%s' % number
+            print u'转换{0}的相册集Json失败'.format(number)
             print content
             traceback.print_exc()
         return photos
@@ -143,24 +140,17 @@ class QzonePhoto(object):
         """
         session, photo, number, index, count = args
         url = photo.url.replace('\\', '')
-        response = None
-        content = None
-        try:
-            response = session.get(url, timeout=8)
-            content = response.content
-            print content
-        except Exception:
-            print u'下载图片失败:qq-%s' % number
-        finally:
-            if response:
-                response.close()
-        folder = cls.getsavepath(number, index, photo.ablum.albumname)
+        print u'下载{0}第{1}个相册的第{2}张照片'.format(number, index, count)
+        response = session.get(url, timeout=8)
+        content = response.content
+        folder = cls.getsavepath(number, index, photo.album.name)
         path = os.path.join(folder, u'{0}_{1}.jpeg'.format(count, photo.name))
         if not cls.ispathvalid(path):
             path = os.path.join(folder, u'{0}.jpeg'.format(count))
         with open(path, "wb") as stream:
             stream.write(content)
             stream.close()
+        response.close()
 
 
     @classmethod
@@ -214,7 +204,7 @@ class QzonePhoto(object):
         """保存相册。
         查询相册并保存图片
         """
-        print u'获取：' + str(number) + u'的相册信息'
+        print u'获取：{0}的相册信息'.format(number)
         ablums = self.getablums(number)
         if len(ablums) > 0:
             for index, ablum in enumerate(ablums):
@@ -222,7 +212,11 @@ class QzonePhoto(object):
                     photos = self.getphotosbyalbum(ablum, number)
                     for count, photo in enumerate(photos):
                         common.get_queue().put((self.savephoto,
-                                                [(self.session, photo, number, index, count)]),
+                                                [(self.session,
+                                                  photo,
+                                                  number,
+                                                  index + 1,
+                                                  count + 1)]),
                                                block=True)
         else:
             print u'读取到得相册个数为0'

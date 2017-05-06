@@ -18,9 +18,12 @@ qz = qphoto.QzonePhoto()
 qz.login(10000, 'Password')
 print '登录完成!'
 common.set_queue(Queue.Queue())
-worker = Worker()
-worker.setDaemon(True)
-worker.start()
+worker_count = 2
+while worker_count > 0:
+    worker = Worker()
+    worker.setDaemon(False)
+    worker.start()
+    worker_count -= 1
+qz.savephotos(qq)
 while True:
-    qz.savephotos(qq)
-    qq += 1
+    pass
