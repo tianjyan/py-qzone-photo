@@ -152,7 +152,6 @@ class QzonePhoto(object):
             stream.close()
         response.close()
 
-
     @classmethod
     def getsavepath(cls, number, index, albumname):
         """
