@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # coding=utf-8
 # pylint: disable=W0703
+# pylint: disable=W1401
 # pylint: disable=E1101
 
 '''
@@ -13,6 +14,7 @@ import traceback
 import urllib2
 import os
 import random
+import re
 from qqlib import qzone
 import qqlib
 from qphoto.model import Album, Photo
@@ -139,16 +141,17 @@ class QzonePhoto(object):
         """
         logger, session, photo, number, index, count = args
         url = photo.url.replace('\\', '')
+        folder = cls.getsavepath(number, index, photo.album.name)
+        fixname = re.sub('[\\\/:*?"<>|]', '-', photo.name)
+        path = os.path.join(folder, u'{0}_{1}.jpeg'.format(count, fixname))
+        if os.path.exists(path):
+            logger.info(u'{0}第{1}个相册的第{2}张照片已经存在。相册名：{3}，照片名：{4}'.format(
+                number, index, count, photo.album.name, photo.name))
+            return
         logger.info(u'下载{0}第{1}个相册的第{2}张照片。相册名：{3}，照片名：{4}'.format(
             number, index, count, photo.album.name, photo.name))
         response = session.get(url, timeout=8)
         content = response.content
-        folder = cls.getsavepath(number, index, photo.album.name)
-        path = os.path.join(folder, u'{0}_{1}.jpeg'.format(count, photo.name))
-        if os.path.exists(path):
-            return
-        if not cls.ispathvalid(path):
-            path = os.path.join(folder, u'{0}.jpeg'.format(count))
         with open(path, "wb") as stream:
             stream.write(content)
             stream.close()
@@ -165,41 +168,11 @@ class QzonePhoto(object):
         qqpath = os.path.join(base, u'{0}'.format(number))
         if not os.path.exists(qqpath):
             os.mkdir(qqpath)
-        albumpath = os.path.join(qqpath, u'{0}_{1}'.format(index, albumname))
-        if not cls.ispathvalid(albumpath):
-            albumpath = os.path.join(qqpath, u'{0}'.format(index))
+        fixname = re.sub('[\\\/:*?"<>|]', '-', albumname)
+        albumpath = os.path.join(qqpath, u'{0}_{1}'.format(index, fixname))
         if not os.path.exists(albumpath):
             os.mkdir(albumpath)
         return albumpath
-
-    @classmethod
-    def ispathvalid(cls, pathname):
-        """
-        路径是否有效
-        http://stackoverflow.com/questions/9532499/check-whether-a-path-is-valid-in-python-without-creating-a-file-at-the-paths-ta
-        :param pathname:
-        :return: bool
-        """
-        import errno
-        import sys
-        try:
-            _, pathname = os.path.splitdrive(pathname)
-            root = os.environ.get('HOMEDRIVE', 'C:') if sys.platform == 'win32' else os.path.sep
-            root = root.rstrip(os.path.sep) + os.path.sep
-
-            for pathname_part in pathname.split(os.path.sep):
-                try:
-                    os.lstat(root + pathname_part)
-                except OSError as exc:
-                    if hasattr(exc, 'winerror'):
-                        if exc.winerror == 123:
-                            return False
-                    elif exc.errno in [errno.ENAMETOOLONG, errno.ERANGE]:
-                        return False
-        except TypeError:
-            return False
-        else:
-            return True
 
     def savephotos(self, number, maxphotocount=0):
         """保存相册。
