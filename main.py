@@ -41,4 +41,3 @@ while True:
     if done:
         logger.info(u'所有进程已经结束。')
         break
-

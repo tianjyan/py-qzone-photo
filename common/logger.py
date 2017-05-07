@@ -7,6 +7,7 @@ from logging.handlers import RotatingFileHandler
 from logging import StreamHandler
 import os
 
+
 class Logger(object):
     """
     给全局用的logger，输出到文件
@@ -58,7 +59,8 @@ class Logger(object):
         logger = logging.getLogger(name)
         logger.setLevel(level)
         fh = RotatingFileHandler(os.path.join(cwd, 'logs', name),
-                                 maxBytes=10*1024*1024, backupCount=5)
+                                 maxBytes=10 * 1024 * 1024,
+                                 backupCount=5)
         fh.setFormatter(formatter)
         fh.setLevel(level)
         ch = StreamHandler()
@@ -67,4 +69,3 @@ class Logger(object):
         logger.addHandler(fh)
         logger.addHandler(ch)
         return logger
-        

@@ -22,12 +22,14 @@ def get_queue():
     """
     return WORKQUEUE
 
+
 def set_main_thread_pending(value):
     """
     设置主线程是否已经处于等待状态
     """
     global ISPENDING
     ISPENDING = value
+
 
 def get_main_thread_pending():
     """
