@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # coding=utf-8
 # pylint: disable=W0703
+# pylint: disable=E1101
 
 '''
 QQ空间相册查询下载模块
@@ -32,7 +33,8 @@ class QzonePhoto(object):
                  '&topicId={album_id}&noTopic=0&uin={user}&pageStart=0&pageNum=9000&inCharset=gbk'
                  '&outCharset=gbk&source=qzone&plat=qzone&outstyle=json&format=jsonp&json_esc=1')
 
-    def __init__(self):
+    def __init__(self, logger):
+        self.logger = logger
         self.cookie = None
         self.qzone_g_tk = None
         self.number = None
@@ -51,8 +53,7 @@ class QzonePhoto(object):
                 print('Error:', exc.message)
             verifier = exc.verifier
             open('verify.jpg', 'wb').write(verifier.fetch_image())
-            print u'验证码已保存到verify.jpg'
-            vcode = input('请输入验证码(带单引号)：')
+            vcode = input('验证码已保存到verify.jpg，请输入验证码(带单引号)：')
             request.verifier.verify(vcode)
             request.login()
         self.session = request.session
@@ -74,7 +75,7 @@ class QzonePhoto(object):
             response = self.session.get(requesturl, timeout=8)
             content = response.text
         except Exception:
-            print u'获取{0}的相册集失败。'.format(number)
+            self.logger.error(u'获取{0}的相册集失败。地址: {1}'.format(number, requesturl))
             traceback.print_exc()
             return ablums
         finally:
@@ -90,8 +91,7 @@ class QzonePhoto(object):
                         for album in item['albumList']:
                             ablums.append(Album._make([album['id'], album['name'], album['total']]))
         except Exception:
-            print u'转换{0}的相册集Json失败'.format(number)
-            print content
+            self.logger.error(u'转换{0}的相册集Json失败。Json内容: {1}'.format(number, content))
             traceback.print_exc()
         return ablums
 
@@ -110,7 +110,7 @@ class QzonePhoto(object):
             response = self.session.get(requesturl, timeout=8)
             content = response.text
         except Exception:
-            print u'获取{0}的相册失败。'.format(number)
+            self.logger.error('获取{0}的相册失败。地址：{1}'.format(number, requesturl))
             traceback.print_exc()
             return photos
         finally:
@@ -128,8 +128,7 @@ class QzonePhoto(object):
                         url = ('origin_url' in item and item['origin_url'] or item['url'])
                         photos.append(Photo._make([url, item['name'], album]))
         except Exception:
-            print u'转换{0}的相册集Json失败'.format(number)
-            print content
+            self.logger.error('转换{0}的相册集Json失败。Json内容：{1}'.format(number, content))
             traceback.print_exc()
         return photos
 
@@ -138,13 +137,16 @@ class QzonePhoto(object):
         """
         保存图片
         """
-        session, photo, number, index, count = args
+        logger, session, photo, number, index, count = args
         url = photo.url.replace('\\', '')
-        print u'下载{0}第{1}个相册的第{2}张照片'.format(number, index, count)
+        logger.info(u'下载{0}第{1}个相册的第{2}张照片。相册名：{3}，照片名：{4}'.format(
+            number, index, count, photo.album.name, photo.name))
         response = session.get(url, timeout=8)
         content = response.content
         folder = cls.getsavepath(number, index, photo.album.name)
         path = os.path.join(folder, u'{0}_{1}.jpeg'.format(count, photo.name))
+        if os.path.exists(path):
+            return
         if not cls.ispathvalid(path):
             path = os.path.join(folder, u'{0}.jpeg'.format(count))
         with open(path, "wb") as stream:
@@ -199,23 +201,35 @@ class QzonePhoto(object):
         else:
             return True
 
-    def savephotos(self, number):
+    def savephotos(self, number, maxphotocount=0):
         """保存相册。
         查询相册并保存图片
         """
-        print u'获取：{0}的相册信息'.format(number)
+        photocount = 0
+        self.logger.info(u'获取：{0}的相册信息。'.format(number))
         ablums = self.getablums(number)
         if len(ablums) > 0:
             for index, ablum in enumerate(ablums):
                 if ablum.count > 0:
                     photos = self.getphotosbyalbum(ablum, number)
                     for count, photo in enumerate(photos):
+                        if maxphotocount is not 0 and photocount >= maxphotocount:
+                            self.logger.info(u'已经达到指定的最大下载个数')
+                            return
+                        if common.get_queue().qsize() >= 1000:
+                            self.logger.info(u'队列任务书已经达到1000，等待执行完后再继续')
+                            while True:
+                                if common.get_queue().qsize() <= 500:
+                                    break
                         common.get_queue().put((self.savephoto,
-                                                [(self.session,
+                                                [(self.logger,
+                                                  self.session,
                                                   photo,
                                                   number,
                                                   index + 1,
                                                   count + 1)]),
                                                block=True)
+                        photocount += 1
+            self.logger.info(u'已经将{0}的照片放到下载队列中。'.format(number))
         else:
-            print u'读取到得相册个数为0'
+            self.logger.info(u'获取：{0}的相册信息的个数为0。'.format(number))

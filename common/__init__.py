@@ -21,3 +21,16 @@ def get_queue():
     获取工作队列。
     """
     return WORKQUEUE
+
+def set_main_thread_pending(value):
+    """
+    设置主线程是否已经处于等待状态
+    """
+    global ISPENDING
+    ISPENDING = value
+
+def get_main_thread_pending():
+    """
+    获取主线程是否已经处于等待状态
+    """
+    return ISPENDING
