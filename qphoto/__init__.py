@@ -26,6 +26,7 @@ class QzonePhoto(object):
     查询QQ空间相册并下载的类。
     """
 
+    albumbase_old = "http://photo.qq.com/fcgi-bin/fcg_list_album?uin={0}&outstyle=2"
     # 地址更新来源：https://github.com/fooofei/py_qzone_photo
     albumbase = ('https://h5.qzone.qq.com/proxy/domain/tjalist.photo.qzone.qq.com/fcgi-bin/'
                  'fcg_list_album_v3?g_tk={gtk}&t={t}&hostUin={dest_user}&uin={user}&appid=4'
@@ -92,6 +93,43 @@ class QzonePhoto(object):
                     for item in content['data']['albumListModeClass']:
                         for album in item['albumList']:
                             ablums.append(Album._make([album['id'], album['name'], album['total']]))
+        except Exception:
+            self.logger.error(u'转换{0}的相册集Json失败。Json内容: {1}'.format(number, content))
+            traceback.print_exc()
+        # 如果新的api无法获取相册，则使用旧版本api获取数据
+        if len(ablums) == 0:
+            ablums = self.getablums_old(number)
+        return ablums
+
+    def getablums_old(self, number):
+        """
+        获取相册集。
+        可能会遇到未登录的错误，或者解码失败的错误。
+        查询失败会返回一个空的集合。
+        """
+        ablums = list()
+        requesturl = self.albumbase_old.format(number)
+        content = None
+        response = None
+        try:
+            response = self.session.get(requesturl, timeout=8)
+            response.encoding = 'gbk'
+            content = response.text
+        except Exception:
+            self.logger.error(u'获取{0}的相册集失败。地址: {1}'.format(number, requesturl))
+            traceback.print_exc()
+            return ablums
+        finally:
+            if response:
+                response.close()
+        try:
+            if content:
+                content = content.replace('_Callback(', '')
+                content = content.replace(');', '')
+                content = json.loads(content)
+                if 'album' in content:
+                    for i in content['album']:
+                        ablums.append(Album(i['id'], i['name'], i['total']))
         except Exception:
             self.logger.error(u'转换{0}的相册集Json失败。Json内容: {1}'.format(number, content))
             traceback.print_exc()
