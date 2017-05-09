@@ -26,7 +26,6 @@ class QzonePhoto(object):
     查询QQ空间相册并下载的类。
     """
 
-    albumbase_old = "http://photo.qq.com/fcgi-bin/fcg_list_album?uin={0}&outstyle=2"
     # 地址更新来源：https://github.com/fooofei/py_qzone_photo
     albumbase = ('https://h5.qzone.qq.com/proxy/domain/tjalist.photo.qzone.qq.com/fcgi-bin/'
                  'fcg_list_album_v3?g_tk={gtk}&t={t}&hostUin={dest_user}&uin={user}&appid=4'
@@ -89,50 +88,43 @@ class QzonePhoto(object):
                 content = content.replace('_Callback(', '')
                 content = content.replace(');', '')
                 content = json.loads(content)
-                if 'data' in content and 'albumListModeClass' in content['data']:
-                    for item in content['data']['albumListModeClass']:
-                        for album in item['albumList']:
-                            ablums.append(Album._make([album['id'], album['name'], album['total']]))
+                if 'data' in content and 'mode' in content['data']:
+                    mode = content['data']['mode']
+                    if mode == 2:
+                        ablums = self.getablumssortbylist(number, content)
+                    elif mode == 3:
+                        ablums = self.getablumssortbyclass(number, content)
+                    else:
+                        self.logger.error(u'无法识别{0}的排序模式: {1}'.format(number, content))
+                else:
+                    self.logger.error(u'无法识别{0}的Json格式: {1}'.format(number, content))
         except Exception:
             self.logger.error(u'转换{0}的相册集Json失败。Json内容: {1}'.format(number, content))
             traceback.print_exc()
-        # 如果新的api无法获取相册，则使用旧版本api获取数据
-        if len(ablums) == 0:
-            ablums = self.getablums_old(number)
         return ablums
 
-    def getablums_old(self, number):
+    def getablumssortbylist(self, number, content):
         """
-        获取相册集。
-        可能会遇到未登录的错误，或者解码失败的错误。
-        查询失败会返回一个空的集合。
+        解析普通视图分类
         """
+        self.logger.debug(u'以普通视图分类方式获取{0}的相册。{1}'.format(number, content))
         ablums = list()
-        requesturl = self.albumbase_old.format(number)
-        content = None
-        response = None
-        try:
-            response = self.session.get(requesturl, timeout=8)
-            response.encoding = 'gbk'
-            content = response.text
-        except Exception:
-            self.logger.error(u'获取{0}的相册集失败。地址: {1}'.format(number, requesturl))
-            traceback.print_exc()
-            return ablums
-        finally:
-            if response:
-                response.close()
-        try:
-            if content:
-                content = content.replace('_Callback(', '')
-                content = content.replace(');', '')
-                content = json.loads(content)
-                if 'album' in content:
-                    for i in content['album']:
-                        ablums.append(Album(i['id'], i['name'], i['total']))
-        except Exception:
-            self.logger.error(u'转换{0}的相册集Json失败。Json内容: {1}'.format(number, content))
-            traceback.print_exc()
+        if 'albumListModeSort' in content['data']:
+            for item in content['data']['albumListModeSort']:
+                ablums.append(Album._make([item['id'], item['name'], item['total']]))
+        return ablums
+
+    def getablumssortbyclass(self, number, content):
+        """
+        解析分组视图分类
+        """
+        self.logger.debug(u'以分类视图分类方式获取{0}的相册。{1}'.format(number, content))
+        ablums = list()
+        if 'albumListModeClass' in content['data']:
+            for item in content['data']['albumListModeClass']:
+                if 'albumList' in item and item['albumList']:
+                    for album in item['albumList']:
+                        ablums.append(Album._make([album['id'], album['name'], album['total']]))
         return ablums
 
     def getphotosbyalbum(self, album, number):
@@ -225,7 +217,7 @@ class QzonePhoto(object):
                     photos = self.getphotosbyalbum(ablum, number)
                     for count, photo in enumerate(photos):
                         if maxphotocount is not 0 and photocount >= maxphotocount:
-                            self.logger.info(u'已经达到指定的最大下载个数')
+                            self.logger.info(u'已经达到指定的最大下载个数:{0}'.format(photocount))
                             return
                         if common.get_queue().qsize() >= 1000:
                             self.logger.info(u'队列任务书已经达到1000，等待执行完后再继续')

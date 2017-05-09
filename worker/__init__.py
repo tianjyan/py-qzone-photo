@@ -18,17 +18,17 @@ class Worker(threading.Thread):
     """
     任务重试和执行的类。
     """
-    def __init__(self, logger):
+    def __init__(self, logger, maxretrycount=3, maxdeleytime=1):
         threading.Thread.__init__(self)
-        self.max_retry_count = 3
-        self.max_deley_time = 1
+        self.max_retry_count = maxretrycount
+        self.max_deley_time = maxdeleytime
         self.logger = logger
 
     def run(self):
         while True:
             if common.get_queue().empty():
                 if common.get_main_thread_pending():
-                    self.logger.info(u'所有任务已经完成，此线程将结束')
+                    self.logger.info(u'所有任务已经完成，此线程:{0}将结束'.format(self.getName()))
                     break
                 continue
             action, arg = common.get_queue().get(block=True)
@@ -40,6 +40,6 @@ class Worker(threading.Thread):
                     break
                 except Exception:
                     traceback.print_exc()
-                    print u'%s秒后将重试' % self.max_deley_time
+                    self.logger.info(u'{0}秒后将重试'.format(self.max_deley_time))
                     retry_count += 1
                     time.sleep(self.max_deley_time)
