@@ -55,7 +55,7 @@ class QzonePhoto(object):
                 print('Error:', exc.message)
             verifier = exc.verifier
             open('verify.jpg', 'wb').write(verifier.fetch_image())
-            vcode = input('验证码已保存到verify.jpg，请输入验证码(带单引号)：')
+            vcode = input(u'验证码已保存到verify.jpg，请输入验证码(带单引号)：')
             request.verifier.verify(vcode)
             request.login()
         self.session = request.session
@@ -75,7 +75,8 @@ class QzonePhoto(object):
         response = None
         try:
             response = self.session.get(requesturl, timeout=8)
-            content = response.text
+            content = response.content.decode('gbk')
+            self.logger.debug(u'获取{0}的相册内容：{1}'.format(number, content))
         except Exception:
             self.logger.error(u'获取{0}的相册集失败。地址: {1}'.format(number, requesturl))
             traceback.print_exc()
@@ -95,11 +96,11 @@ class QzonePhoto(object):
                     elif mode == 3:
                         ablums = self.getablumssortbyclass(number, content)
                     else:
-                        self.logger.error(u'无法识别{0}的排序模式: {1}'.format(number, content))
+                        self.logger.error(u'无法识别{0}的排序模式。'.format(number))
                 else:
-                    self.logger.error(u'无法识别{0}的Json格式: {1}'.format(number, content))
+                    self.logger.error(u'无法识别{0}的Json格式。'.format(number))
         except Exception:
-            self.logger.error(u'转换{0}的相册集Json失败。Json内容: {1}'.format(number, content))
+            self.logger.error(u'转换{0}的相册集Json失败。'.format(number))
             traceback.print_exc()
         return ablums
 
@@ -107,7 +108,7 @@ class QzonePhoto(object):
         """
         解析普通视图分类
         """
-        self.logger.debug(u'以普通视图分类方式获取{0}的相册。{1}'.format(number, content))
+        self.logger.debug(u'以普通视图分类方式获取{0}的相册。'.format(number))
         ablums = list()
         if 'albumListModeSort' in content['data']:
             for item in content['data']['albumListModeSort']:
@@ -118,7 +119,7 @@ class QzonePhoto(object):
         """
         解析分组视图分类
         """
-        self.logger.debug(u'以分类视图分类方式获取{0}的相册。{1}'.format(number, content))
+        self.logger.debug(u'以分类视图分类方式获取{0}的相册。'.format(number))
         ablums = list()
         if 'albumListModeClass' in content['data']:
             for item in content['data']['albumListModeClass']:
@@ -140,7 +141,8 @@ class QzonePhoto(object):
         response = None
         try:
             response = self.session.get(requesturl, timeout=8)
-            content = response.text
+            content = response.content.decode('gbk')
+            self.logger.debug(u'获取{0}的相册内容：{1}'.format(number, content))
         except Exception:
             self.logger.error('获取{0}的相册失败。地址：{1}'.format(number, requesturl))
             traceback.print_exc()
@@ -160,7 +162,7 @@ class QzonePhoto(object):
                         url = ('origin_url' in item and item['origin_url'] or item['url'])
                         photos.append(Photo._make([url, item['name'], album]))
         except Exception:
-            self.logger.error('转换{0}的相册集Json失败。Json内容：{1}'.format(number, content))
+            self.logger.error('转换{0}的相册Json失败'.format(number))
             traceback.print_exc()
         return photos
 

@@ -64,8 +64,9 @@ class Logger(object):
         fh.setFormatter(formatter)
         fh.setLevel(level)
         ch = StreamHandler()
-        ch.setFormatter(formatter)
-        ch.setLevel(level)
-        logger.addHandler(fh)
-        logger.addHandler(ch)
+        if level is not logging.DEBUG:
+            ch.setFormatter(formatter)
+            ch.setLevel(level)
+            logger.addHandler(fh)
+            logger.addHandler(ch)
         return logger
