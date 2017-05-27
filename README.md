@@ -18,3 +18,6 @@
 
 # 依赖列表
 qqlib：https://github.com/gera2ld/qqlib
+
+# 报告Issue
+欢迎报告Issue，但是请确保Issue的信息的完整，不完整的Issue可能无法被修复。自行更改代码导致的问题请勿在此Repo中开Issue。
