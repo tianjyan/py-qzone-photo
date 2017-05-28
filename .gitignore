@@ -98,6 +98,7 @@ qzonephoto
 # test class
 app.py
 test.*
+config.dev.json
 
 # log
 !logs/.gitkeep
