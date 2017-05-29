@@ -11,7 +11,7 @@
 
 # 使用方法
 * 安装[Python 2.7.13](https://www.python.org/downloads/release/python-2713/)；
-* 安装依赖：pip install -r requirements.txt 
+* 安装依赖：pip install -r requirements.txt；
 * 修改main.py的登录账户为你的qq账号和密码；
 * 修改main.py的qq号为你需要的qq号；
 * cmd中键入Python main.py运行。
@@ -20,4 +20,6 @@
 qqlib：https://github.com/gera2ld/qqlib
 
 # 报告Issue
-欢迎报告Issue，但是请确保Issue的信息的完整，不完整的Issue可能无法被修复。自行更改代码导致的问题请勿在此Repo中开Issue。
+欢迎报告Issue，请确保Issue的描述信息的完整，以下Issue可能无法修复：
+* Issue信息描述并未按照模板描述的；
+* 自行修改代码以后导致的Issue。
