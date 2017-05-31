@@ -173,8 +173,9 @@ class QzonePhoto(object):
         """
         logger, session, photo, number, index, count = args
         url = photo.url.replace('\\', '')
-        folder = cls.getsavepath(number, index, photo.album.name)
-        fixname = re.sub('[\\\/:*?"<>|]', '-', photo.name)
+        fixname = cls.fixinvaildname(photo.album.name, number, index)
+        folder = cls.getsavepath(number, index, fixname)
+        fixname = cls.fixinvaildname(photo.name, number, index)
         path = os.path.join(folder, u'{0}_{1}.jpeg'.format(count, fixname))
         if os.path.exists(path):
             logger.info(u'{0}第{1}个相册的第{2}张照片已经存在。相册名：{3}，照片名：{4}'.format(
@@ -200,11 +201,23 @@ class QzonePhoto(object):
         qqpath = os.path.join(base, u'{0}'.format(number))
         if not os.path.exists(qqpath):
             os.mkdir(qqpath)
-        fixname = re.sub('[\\\/:*?"<>|]', '-', albumname)
+        fixname = cls.fixinvaildname(albumname, number, index)
         albumpath = os.path.join(qqpath, u'{0}_{1}'.format(index, fixname))
         if not os.path.exists(albumpath):
             os.mkdir(albumpath)
         return albumpath
+
+    @classmethod
+    def fixinvaildname(cls, name, number, index):
+        """
+        修复空文件名或者不符合命名规范的文件名
+        """
+        fixname = None
+        if name:
+            fixname = re.sub('[\\\/:*?"<>|]', '-', name)
+        else:
+            fixname = u'renamed_{0}_{1}'.format(number, index)
+        return fixname
 
     def savephotos(self, number, maxphotocount=0):
         """保存相册。
