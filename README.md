@@ -21,5 +21,5 @@ qqlib：https://github.com/gera2ld/qqlib
 
 # 报告Issue
 欢迎报告Issue，请确保Issue的描述信息的完整，以下Issue可能无法修复：
-* Issue信息描述并未按照模板描述的；
+* Issue信息描述并未按照模板描述；
 * 自行修改代码以后导致的Issue。
