@@ -18,9 +18,10 @@ from common import logger
 logger = logger.Logger()
 logger.info(u'Logger初始化完成')
 logger.info(u'读取配置文件')
-confileFileName = os.environ.get('env')
-if confileFileName is None:
-    confileFileName = 'config.json'
+confileFileName = 'config.json'
+env = os.environ.get('ENV')
+if env == "DEV":
+    confileFileName = 'config.dev.json'
 configFile = file(confileFileName)
 config = json.load(configFile)
 configFile.close()
