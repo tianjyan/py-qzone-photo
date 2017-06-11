@@ -13,7 +13,6 @@
 * 安装[Python 2.7.13](https://www.python.org/downloads/release/python-2713/)；
 * 安装依赖：pip install -r requirements.txt；
 * 修改配置文件`config.json`
-* 修改main.py的qq号为你需要的qq号；
 * cmd中键入Python main.py运行。
 
 # 依赖列表
