@@ -96,7 +96,6 @@ ENV/
 qzonephoto
 
 # test class
-app.py
 test.*
 config.dev.json
 
