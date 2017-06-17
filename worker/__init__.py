@@ -27,9 +27,9 @@ class Worker(threading.Thread):
     def run(self):
         while True:
             if common.get_queue().empty():
-                if common.get_main_thread_pending():
-                    self.logger.info(u'所有任务已经完成，此线程:{0}将结束'.format(self.getName()))
-                    break
+                # if common.get_main_thread_pending():
+                #     self.logger.info(u'所有任务已经完成，此线程:{0}将结束'.format(self.getName()))
+                #     break
                 continue
             action, arg = common.get_queue().get(block=True)
             retry_count = 0
