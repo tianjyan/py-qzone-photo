@@ -1,6 +1,7 @@
 # 简介
 [![Platform](https://img.shields.io/badge/Language-Python%202.7-blue.svg)](https://www.python.org/)
 [![Build](https://api.travis-ci.org/youngytj/Qzone_Photo.svg?branch=master)](https://travis-ci.org/youngytj/Qzone_Photo)
+[![Gitter](https://img.shields.io/badge/chat-on%20gitter-blue.svg)](https://gitter.im/tianjyan/Lobby)
 
 批量下载QQ空间相册。
 
