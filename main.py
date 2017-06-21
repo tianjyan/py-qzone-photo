@@ -7,18 +7,29 @@
 Licensed to MIT
 '''
 
+import os
+import json
 import Queue
 import qphoto
 from worker import Worker
 import common
 from common import logger
 
-qq = 10000
-print '正在登陆...'
 logger = logger.Logger()
+logger.info(u'Logger初始化完成')
+logger.info(u'读取配置文件')
+confileFileName = 'config.json'
+env = os.environ.get('ENV')
+if env == "DEV":
+    confileFileName = 'config.dev.json'
+configFile = file(confileFileName)
+config = json.load(configFile)
+configFile.close()
+logger.info(u'读取配置文件完成')
 qz = qphoto.QzonePhoto(logger)
-qz.login(10000, 'Password')
-print '登录完成!'
+logger.info(u'登陆QQ:{}'.format(config['account']))
+qz.login(config['account'], config['password'])
+logger.info(u'登陆完成')
 common.set_queue(Queue.Queue())
 common.set_main_thread_pending(False)
 worker_count = 2
@@ -29,7 +40,7 @@ while worker_count > 0:
     worker.start()
     worker_count -= 1
     worker_list.append(worker)
-qz.savephotos(qq)
+qz.savephotos(config['target_qq'])
 logger.info(u'主线程已经将所有任务放到队列中')
 common.set_main_thread_pending(True)
 while True:
