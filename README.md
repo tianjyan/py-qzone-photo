@@ -1,3 +1,6 @@
+# Deprecated
+因为官方登陆的API已经做了变更，加上自己没有太多精力和时间再维护这个库，所以废弃这个库。
+
 # 简介
 [![Platform](https://img.shields.io/badge/Language-Python%202.7-blue.svg)](https://www.python.org/)
 [![Build](https://api.travis-ci.org/youngytj/Qzone_Photo.svg?branch=master)](https://travis-ci.org/youngytj/Qzone_Photo)
